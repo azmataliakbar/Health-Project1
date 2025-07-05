@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Health & Wellness Planner Agent
 
 An AI-powered Health & Wellness Planner Agent built with OpenAI and Streamlit.
@@ -425,3 +426,6 @@ streamlit run main.py
 
 
 
+=======
+# Health-Project1
+>>>>>>> 2de5145d476ccfe55da9b96f04bf6241b6220771
