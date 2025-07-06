@@ -7,14 +7,17 @@ class EscalationAgent:
     async def process_message(self, message: str, context: UserSessionContext, streamer=None) -> str:
         """Process escalation request - ASYNC and FIXED"""
         print("🔴 Escalation Agent - User said:", message)
+        # Log the user's original request for debugging or monitoring
+
         
-        # Add handoff log
         context.add_handoff_log("main", "escalation", f"User requested human coach: {message[:50]}...")
-        
-        # Generate unique reference ID
+        # Record the handoff event from main agent to escalation agent
+
         import time
         ref_id = f"HC-{context.uid}-{int(time.time())}"
-        
+        # Generate a unique reference ID for tracking the escalation case
+
+        # Compose a detailed message for the user including next steps and contact info
         response = f"""🔴 CONNECTING YOU WITH HUMAN SUPPORT 🔴
 
 I understand you'd like to speak with a human trainer! While I'm connecting you, here's what I can help you with in the meantime:
@@ -42,13 +45,16 @@ While you wait, I can still help you with:
 • Goal setting and tracking
 • General health and wellness tips"""
         
-        # ✅ Fixed streaming logic
+        # ✅ If a streaming system is available, send the response in real-time
+
         if streamer:
             try:
                 await streamer.update(response)
                 print("✅ Escalation response streamed successfully")
             except Exception as e:
                 print(f"❌ Streaming error: {e}")
+                # Catch any errors during streaming and print a friendly log
+
         
         print(f"✅ Escalation agent returning response: {len(response)} characters")
         return response

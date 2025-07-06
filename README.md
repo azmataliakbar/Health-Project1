@@ -1,8 +1,9 @@
-<<<<<<< HEAD
+
 # Health & Wellness Planner Agent
 
 An AI-powered Health & Wellness Planner Agent built with OpenAI and Streamlit.
 
+# Link: https://docs.google.com/document/d/1wxe_O8X3u42gVHzgu5OiOobQyoTpjABZAxEsbV40FDo/edit?tab=t.0
 ## Features
 
 - 🎯 **Goal Analysis**: Converts natural language goals into structured plans
@@ -32,18 +33,123 @@ health_wellness_agent/
 ├── guardrails.py          # Input/output validation
 ├── hooks.py               # Lifecycle hooks for logging
 ├── tools/                 # Individual tools
+             Tools are like machines,
+             Just do a job (no thinking), You give input, they give output.
+             Does this file only do one task?➤ Put in tools/
 │   ├── goal_analyzer.py
 │   ├── meal_planner.py
 │   ├── workout_recommender.py
 │   ├── scheduler.py
 │   └── tracker.py
 ├── agents/                # Specialized agents
+              Agents are like specialist humans,
+              Decide what tool to use, Handle more complex user needs,
+              Can use multiple tools together, Can switch (handoff) to another agent.
+              Does this file make decisions or route logic?➤ Put in agents/
 │   ├── escalation_agent.py
 │   ├── nutrition_expert_agent.py
 │   └── injury_support_agent.py
 ├── utils/                 # Utilities
 │   └── streaming.py
 └── README.md
+
+# 📁 Root Files
+
+main.py
+Launches the Streamlit app.
+Handles user interface and interactions.
+
+agent.py
+Core logic for handling user queries.
+Routes tasks to the correct tools or sub-agents.
+
+context.py
+Manages user session data and memory.
+Keeps track of user state during interactions.
+
+guardrails.py
+Validates input/output for safety and correctness.
+Ensures structured responses and input format.
+
+hooks.py
+Contains event hooks for actions like logging or debugging.
+Useful for monitoring or tracking behavior.
+
+# 📁 tools/ – Feature-specific tools
+
+goal_analyzer.py
+Analyzes user's health goals (e.g., weight loss, muscle gain).
+
+meal_planner.py
+Creates meal plans based on preferences and goals.
+
+workout_recommender.py
+Suggests workouts tailored to the user.
+
+scheduler.py
+Schedules plans (e.g., reminders, routines).
+
+tracker.py
+Tracks progress like calories, weight, or exercise logs.
+
+# 📁 agents/ – Specialized agents
+
+escalation_agent.py
+Handles complex or unsupported queries, possibly by redirecting.
+
+nutrition_expert_agent.py
+Provides expert-level dietary guidance.
+
+injury_support_agent.py
+Offers suggestions for injury recovery or workout modification.
+
+# 📁 utils/ – Helper utilities
+streaming.py
+Enables live response streaming (e.g., showing answers progressively).
+
+# 📄 README.md
+Overview of the project.
+Instructions for setup, usage, and dependencies.
+
+# Quick Repeated Summary
+
+## ✅ Main Files
+
+main.py – Starts the Streamlit app.
+
+agent.py – Main brain; routes user input to the right tool.
+
+context.py – Stores session info and user state.
+
+guardrails.py – Validates inputs/outputs.
+
+hooks.py – For logging/debugging events.
+
+## 🧰 tools/ – Feature-based functions
+
+goal_analyzer.py – Understands user goals.
+
+meal_planner.py – Creates personalized meal plans.
+
+workout_recommender.py – Recommends workouts.
+
+scheduler.py – Manages reminders and plans.
+
+tracker.py – Tracks health progress.
+
+## 🧠 agents/ – Specialist agents
+
+escalation_agent.py – Handles complex/unhandled cases.
+
+nutrition_expert_agent.py – Gives diet expert advice.
+
+injury_support_agent.py – Helps with injury-safe plans.
+
+## 🛠 utils/ – Helpers
+
+streaming.py – Manages streaming/chat effects.
+
+
 
 
 ## Example Usage
@@ -425,7 +531,10 @@ Run Command:
 streamlit run main.py
 
 
-
+### I'm diabetic and trying to lose weight. Can you make a meal plan?
+### I injured my knee, what kind of workouts are safe?
+### I'm doing a vegan keto diet. Can you suggest what to eat?
+### Can I talk to a human instead of the bot?
 =======
 # Health-Project1
->>>>>>> 2de5145d476ccfe55da9b96f04bf6241b6220771
+

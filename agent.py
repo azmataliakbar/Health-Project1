@@ -46,7 +46,7 @@ class HealthWellnessAgent:
         """Search static local responses for known keywords"""
         local_responses = {
             "tree": "🌳 A tree is a perennial plant with a trunk, used in oxygen production and shade.",
-            "tea": "🍵 Tea is a popular beverage made by brewing leaves — often green or black.",
+            # "tea": "🍵 Tea is a popular beverage made by brewing leaves — often green or black.",
             "ball": "🏐 A ball is a round object used in sports like football, volleyball, and basketball.",
             "apple": "🍎 An apple a day keeps the doctor away!"
         }
@@ -145,7 +145,7 @@ class HealthWellnessAgent:
     async def _generate_general_response(self, message: str, context: UserSessionContext, streamer=None) -> str:
         """Generate general response when no specific tool is needed"""
         try:
-            system_prompt = f"""You are a helpful health and wellness assistant. 
+            system_prompt = f"""You are a helpful health and wellness assistant.
             User context: {context.dict()}
             
             Provide helpful, encouraging responses about health, fitness, nutrition, and wellness.
@@ -392,7 +392,7 @@ class HealthWellnessAgent:
         
         # Define handoff conditions
         handoff_conditions = {
-            "escalation": ["human coach", "real trainer", "speak to someone", "human help"],
+            "escalation": ["human coach","human", "real trainer", "speak to someone", "human help"],
             "nutrition_expert": ["diabetes", "diabetic", "allergy", "allergic", "medical condition", "blood pressure"],
             "injury_support": ["injury", "pain", "hurt", "injured", "physical limitation", "disability"]
         }

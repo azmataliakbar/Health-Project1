@@ -3,7 +3,10 @@ import time
 
 class StreamlitStreamer:
     """Handles streaming responses in Streamlit"""
-    def __init__(self, placeholder):  # ✅ accepts placeholder
+    # StreamlitStreamer is responsible for showing live (streamed) text responses in the UI
+
+    # Initialize the streamer with a Streamlit placeholder to display output
+    def __init__(self, placeholder):
         self.placeholder = placeholder
         self.current_text = ""
 
