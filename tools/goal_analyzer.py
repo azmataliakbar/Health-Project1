@@ -3,6 +3,7 @@ from context import UserSessionContext
 import re
 import asyncio
 
+# Main class to analyze and structure user goals
 class GoalAnalyzerTool:
     """Analyzes user goals and converts them to structured format"""
 
@@ -10,6 +11,7 @@ class GoalAnalyzerTool:
     IMPROVE_FITNESS_TARGET = "Improve overall fitness"
     BUILD_MUSCLE_TARGET = "Build muscle mass"
 
+    # Defines regex patterns to match various goal types like weight loss/gain, muscle gain, fitness, etc.
     def __init__(self):
         self.goal_patterns = {
             'weight_loss': re.compile(
@@ -35,8 +37,11 @@ class GoalAnalyzerTool:
         }
 
     async def execute(self, user_input: str, context: UserSessionContext) -> Dict[str, Any]:
+
+        # Keeps async interface even though it's not doing background work
         await asyncio.sleep(0)
 
+        # Initializes default structure for goal output
         structured_goal = {
             "type": None,
             "target": None,
@@ -44,7 +49,7 @@ class GoalAnalyzerTool:
             "specifics": {}
         }
 
-        # Priority ordered goal detection
+        # Ordered list of methods to check for different goal patterns
         handlers = [
             self._handle_weight_loss,
             self._handle_weight_gain,
@@ -57,14 +62,19 @@ class GoalAnalyzerTool:
         for handler in handlers:
             result = handler(user_input)
             if result:
+
+                # Updates structured_goal with matched goal data
                 structured_goal.update(result)
+                # Stores goal in session context
                 context.goal = structured_goal
                 return {
+                    # Returns the structured goal with success
                     "success": True,
                     "goal": structured_goal,
                     "message": self._goal_message(structured_goal)
                 }
-
+        
+        # If no match found, returns a failure message with suggestions
         return {
             "success": False,
             "goal": None,
@@ -77,7 +87,10 @@ class GoalAnalyzerTool:
                 "Please include both what you want to achieve and your timeframe."
             )
         }
-
+    
+    # Uses regex to detect goal like "lose 5 kg in 2 months"
+    # Extracts quantity, unit, duration, and time unit
+    # Returns structured goal dictionary
     def _handle_weight_loss(self, user_input: str):
         match = self.goal_patterns['weight_loss'].search(user_input)
         if match:
@@ -93,7 +106,10 @@ class GoalAnalyzerTool:
                     "time_unit": time_unit.lower()
                 }
             }
-
+        
+    # Uses regex to detect goal like "gain 5 kg in 2 months"
+    # Extracts quantity, unit, duration, and time unit
+    # Returns structured goal dictionary
     def _handle_weight_gain(self, user_input: str):
         match = self.goal_patterns['weight_gain'].search(user_input)
         if match:
@@ -109,7 +125,10 @@ class GoalAnalyzerTool:
                     "time_unit": time_unit.lower()
                 }
             }
-
+        
+    # Matches phrases like "build muscle" or "gain strength"
+    # Accepts optional duration, defaults to "3 months"
+    # Returns goal with focus on strength training
     def _handle_muscle_gain(self, user_input: str):
         match = self.goal_patterns['muscle_gain'].search(user_input)
         if match:
@@ -128,32 +147,17 @@ class GoalAnalyzerTool:
                     "time_unit": unit.lower() if unit else None
                 }
             }
-
+        
+    # Matches "my fitness" or "general fitness"
+    # Accepts optional duration, defaults to "2 months"
+    # Returns structured goal with cardio and strength focus
     def _handle_fitness_with_time(self, user_input: str):
         """Handle explicit fitness goals with timeframes (e.g., 'my fitness in 6 months')"""
         match = self.goal_patterns['fitness_with_time'].search(user_input)
         if match:
             duration, time_unit = match.groups()
             return {
-                "type": "muscle_gain",  # Using muscle_gain type for consistent display
-                "target": "Improve overall fitness",
-                "timeframe": f"{duration} {time_unit}",
-                "specifics": {
-                    "focus": "cardio_and_strength",
-                    "quantity": None,
-                    "unit": time_unit.lower(),
-                    "duration": int(duration),
-                    "time_unit": time_unit.lower()
-                }
-            }
-
-    def _handle_fitness_with_time(self, user_input: str):
-        """Handle explicit fitness goals with timeframes (e.g., 'my fitness in 6 months')"""
-        match = self.goal_patterns['fitness_with_time'].search(user_input)
-        if match:
-            duration, time_unit = match.groups()
-            return {
-                "type": "muscle_gain",  # Using muscle_gain type for consistent display
+                "type": "general_fitness",  # Using muscle_gain type for consistent display
                 "target": self.IMPROVE_FITNESS_TARGET,
                 "timeframe": f"{duration} {time_unit}",
                 "specifics": {
@@ -165,6 +169,8 @@ class GoalAnalyzerTool:
                 }
             }
 
+    # Handles inputs like "my fitness" or "normal fitness" without time
+    # Optionally extracts timeframe like "in 2 months", or defaults to 2 months
     def _handle_general_fitness(self, user_input: str):
         """Handle general fitness goals without explicit timeframes"""
         match = self.goal_patterns['fitness'].search(user_input)
@@ -191,7 +197,11 @@ class GoalAnalyzerTool:
                 "timeframe": timeframe,
                 "specifics": specifics
             }
-
+    
+    # Catches generic keywords if no pattern matched (e.g., "my fitness", "lose", "gain")
+    # Tries to extract time if mentioned
+    # If "my/general/normal fitness" is found, maps to "Improve overall fitness"
+    # Used as a last resort for weakly structured goals
     def _handle_fallback_keywords(self, user_input: str):
         fallback_keywords = [
             "fitness", "gain", "lose", "build muscle",
@@ -229,7 +239,10 @@ class GoalAnalyzerTool:
                     "focus": "cardio_and_strength"
                 }
             }
-
+    
+    # Maps internal goal type to a friendly title like "Weight Loss"
+    # Formats and returns a message like:
+    # "You've set a goal to achieve: Weight Gain — 5 kg in 2 months"
     def _goal_message(self, goal: dict) -> str:
         title_map = {
             "weight_loss": "Weight Loss",
