@@ -1,11 +1,16 @@
 from typing import Dict, Any
 from context import UserSessionContext
 import asyncio
+# Import required types, context for user session, and async functionality
 
+
+# Specialized agent for handling workout and recovery advice based on user injuries
 class InjurySupportAgent:
     """Specialized agent for injury-related fitness modifications"""
     
     def __init__(self):
+        # Predefined modifications for common injuries:
+        # Includes exercises to avoid, safe alternatives, and tips
         self.injury_modifications = {
             "knee": {
                 "avoid": ["Running", "Jumping", "Deep squats", "Lunges"],
@@ -39,16 +44,18 @@ class InjurySupportAgent:
             }
         }
 
+    # Main method that processes user messages and returns injury-related guidance
     async def process_message(self, message: str, context: UserSessionContext, streamer=None) -> str:
         """Process injury-related fitness concerns"""
         print("🏥 Injury Support Agent - User said:", message)
         
         try:
+            # Log the handoff from main agent to injury support for tracking purposes
             context.add_handoff_log("main", "injury_support", f"Physical limitation consultation: {message[:50]}...")
         except Exception as e:
             print(f"Warning: Could not add handoff log: {e}")
         
-        # ✅ FIXED: Safely initialize injury_notes
+        # ✅ FIXED: Safely initialize injury_notes # Store this message in injury notes (if available) for reference or later follow-up
         try:
             if not hasattr(context, 'injury_notes') or context.injury_notes is None:
                 context.injury_notes = []
@@ -57,15 +64,17 @@ class InjurySupportAgent:
             print(f"Warning: Could not update injury notes: {e}")
             # Continue without injury notes if there's an issue
         
-        # Identify injury type
+        # Try to detect which body part is injured based on the user's message
         injury_type = self._identify_injury_type(message)
-        
+
+        # Generate specific advice if injury type is recognized; otherwise, give general safe guidance
         if injury_type and injury_type != "unknown":
             response = self._generate_injury_specific_advice(injury_type, context)
         else:
             response = self._generate_general_injury_advice(context)
         
-        # Handle streaming
+        # Handle streaming, If using a real-time streamer (e.g., Streamlit), send response gradually
+
         if streamer:
             try:
                 await streamer.update(response)
@@ -75,7 +84,8 @@ class InjurySupportAgent:
         
         print(f"✅ Injury support returning response: {len(response)} characters")
         return response
-
+    
+    # Check the message for keywords to determine the injury type (e.g., knee, back, wrist)
     def _identify_injury_type(self, message: str) -> str:
         """Identify type of injury from message"""
         message_lower = message.lower()
@@ -94,7 +104,8 @@ class InjurySupportAgent:
             return "wrist"
         
         return "unknown"
-
+    
+    # Create a detailed response including exercises, tips, and warnings tailored to the specific injury
     def _generate_injury_specific_advice(self, injury_type: str, context: UserSessionContext) -> str:
         """Generate advice for specific injury types"""
         
@@ -142,7 +153,8 @@ I understand you're dealing with {injury_type} pain/injury. Here's your personal
 Would you like me to create a specific modified workout plan that works around your {injury_type} injury? I can also suggest anti-inflammatory meal options to support your recovery."""
 
         return response
-
+    
+    # Provide broad, safe advice when injury type is unknown or not recognized
     def _generate_general_injury_advice(self, context: UserSessionContext) -> str:
         """Generate general injury advice"""
         return """🩹 **COMPREHENSIVE INJURY-SAFE FITNESS PLANNING**
