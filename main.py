@@ -1,19 +1,19 @@
-import streamlit as st
+import streamlit as st          # UI rendering
 import asyncio
 import time
 from agent import HealthWellnessAgent
 from context import UserSessionContext
 from utils.streaming import StreamlitStreamer
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv    # Load .env variables
 
 # Constants
 NONE_SELECTED = "None Selected"
 
-# Load environment variables
+# 📥 Load environment variables (e.g. OpenAI API key)
 load_dotenv()
 
-# Set page config (only once)
+# 🎨 Set up the Streamlit page layout and appearance
 st.set_page_config(
     page_title="Health & Wellness Planner",
     page_icon="💪",
@@ -35,6 +35,7 @@ def initialize_session_state():
     if 'progress_entries' not in st.session_state:
         st.session_state.progress_entries = []
 
+# 🔰 UI SECTION RENDER FUNCTIONS
 def render_header():
     """Render the main header section"""
     st.markdown("<div style='color:red;font-size:40px; font-weight: bold'>💪🏋️‍♂️🦥 Health & Wellness Planner Agent 🦥🚴‍♂️🏃‍♀️</div>", unsafe_allow_html=True)
@@ -164,7 +165,7 @@ async def process_user_input(prompt: str):
                 streamer
             )
             
-            # ✅ NEW: Update session state based on response type
+            # 🆕 Update UI flags based on content of the response
             if "Goal Analyzed Successfully!" in response:
                 st.session_state.goal_updated = True
             elif "Workout Plan Created!" in response:
@@ -183,6 +184,7 @@ async def process_user_input(prompt: str):
                     "response": response
                 })
             
+            # Add assistant response
             search_end = time.time()
             duration = round(search_end - search_start, 2)
             st.session_state.messages.append({
@@ -190,7 +192,7 @@ async def process_user_input(prompt: str):
                 "content": response
             })
             
-            # Search time duration display
+            # Show how long the search took, display it
             st.markdown("---")
             st.markdown("### 🔍 <span style='color:#61dafb'>Health Agent Search Duration</span>", unsafe_allow_html=True)
             st.markdown(f"✅ <span style='color:lightgreen; font-size:25px;'>Search result completed in {duration}s</span>", unsafe_allow_html=True)
@@ -201,6 +203,7 @@ async def process_user_input(prompt: str):
                 "content": f"I encountered an error: {str(e)}"
             })
 
+# 🧍 Sidebar Section: User Profile
 def render_user_profile_section():
     """Render user profile section in sidebar"""
     st.markdown("<div style='color:blue;font-size:35px;font-weight:bold;'>🧑‍🏫 User Profile</div>", unsafe_allow_html=True)
@@ -209,6 +212,7 @@ def render_user_profile_section():
         st.session_state.context.name = name
     return name
 
+# 🎯 Sidebar Section: Goals
 def render_goals_section():
     """Render current goals section in sidebar"""
     st.markdown("<div style='color:orange;font-size:25px;font-weight:bold;'>📊 Current Goals</div>", unsafe_allow_html=True)
@@ -217,6 +221,7 @@ def render_goals_section():
     else:
         st.markdown("💡 Set a goal like: *'I want to lose 5kg in 2 months'*")
 
+# 🍽️ Sidebar Section: Diet Preferences
 def _update_diet_preferences(diet_type: str, allergies: list, meal_prefs: list, calorie_goal: int):
     """Update diet preferences in context"""
     st.session_state.context.diet_preferences = {
@@ -277,6 +282,7 @@ def render_diet_preferences_section():
     else:
         st.markdown("💡 Select your dietary preferences above")
 
+# 🏋️ Sidebar Section: Workout Planner
 def render_workout_plan_section():
     """✅ NEW: Enhanced interactive workout plan section"""
     st.markdown("<div style='color:lightgreen;font-size:25px;font-weight:bold;'>💪 Workout Plan</div>", unsafe_allow_html=True)
@@ -321,6 +327,7 @@ def render_workout_plan_section():
         st.markdown("• Or type: *'I'm a beginner, suggest exercises'*")
         st.markdown("• Or type: *'Create workout plan for weight loss'*")
 
+# 📈 Sidebar Section: Progress Tracking
 def render_progress_tracking_section():
     """✅ NEW: Enhanced interactive progress tracking section"""
     st.markdown("<div style='color:deeppink;font-size:25px;font-weight:bold;'>📈 Progress Tracking</div>", unsafe_allow_html=True)
@@ -364,6 +371,7 @@ def render_progress_tracking_section():
         st.markdown("• Or type: *'I finished 30 minutes of cardio'*")
         st.markdown("• Or type: *'what is my progress'*")
 
+# 📅 Sidebar Section: Scheduler
 def render_scheduler_section():
     """✅ NEW: Interactive scheduler section"""
     st.markdown("<div style='color:orange;font-size:25px;font-weight:bold;'>📅 Schedule & Reminders</div>", unsafe_allow_html=True)
@@ -371,7 +379,7 @@ def render_scheduler_section():
     # Quick schedule buttons
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("📅 Weekly Check-in", key="weekly_schedule"):
+        if st.button("⏰ Weekly Check-in", key="weekly_schedule"):
             st.session_state.schedule_request = "schedule weekly check-in"
             st.rerun()
     with col2:
@@ -395,9 +403,10 @@ def render_scheduler_section():
     st.markdown("• Or type: *'remind me weekly'*")
     st.markdown("• Or type: *'schedule monthly check-in'*")
 
+# 🧹 Sidebar Section: Clear Chat History
 def render_clear_chat_section(name: str):
     """Render clear chat section in sidebar"""
-    st.markdown("<div style='color:red;font-size:25px;font-weight:bold;'>🗑️ Clear Chat History</div>", unsafe_allow_html=True)
+    st.markdown("<div style='color:red;font-size:25px;font-weight:bold;'>🗑️🧹 Clear Chat History</div>", unsafe_allow_html=True)
     if st.button("🧹 Clear Chat History"):
         st.session_state.messages = []
         st.session_state.context = UserSessionContext(name=name, uid=1)
@@ -407,14 +416,16 @@ def render_clear_chat_section(name: str):
         st.session_state.progress_entries = []
         st.rerun()
 
+# 📜👣 Footer
 def render_footer():
-    """Render footer section"""
+    """👣 Render footer section"""
     st.markdown("---")
     st.markdown("👨‍🏫 <span style='font-size:25px'>Mentor: <b style='color:#ffaa00'>Aneeq Khatri</b></span>", unsafe_allow_html=True)
     st.markdown("🧑‍💻 <span style='font-size:25px'>Author: <b style='color:#33ddff'>Azmat Ali</b></span>", unsafe_allow_html=True)
 
+# 🧠 Sidebar Request Handler (automated logic trigger)
 async def handle_sidebar_requests():
-    """✅ NEW: Handle requests from sidebar buttons"""
+    """🚀 Trigger action based on which sidebar button was pressed"""
     if hasattr(st.session_state, 'workout_request'):
         await process_user_input(st.session_state.workout_request)
         del st.session_state.workout_request
@@ -427,6 +438,7 @@ async def handle_sidebar_requests():
         await process_user_input(st.session_state.schedule_request)
         del st.session_state.schedule_request
 
+# 🚀 Main App Runner
 async def main():
     """Main application function - enhanced with interactive sidebar"""
     # Initialize session state
@@ -440,17 +452,16 @@ async def main():
     render_health_tips()
     render_goal_tips()
     
-    # Chat interface
+    # Render chat input and history
     chat_container = st.container()
     with chat_container:
         render_chat_history()
-        
         st.markdown("### 🧠 <span style='color:blue'>Tell me about your health goals...</span>", unsafe_allow_html=True)
         prompt = st.chat_input("Type your health goal here...")
         if prompt:
             await process_user_input(prompt)
     
-    # ✅ ENHANCED: Interactive sidebar sections
+    # ✅ Render: Interactive sidebar sections
     with st.sidebar:
         name = render_user_profile_section()
         render_goals_section()

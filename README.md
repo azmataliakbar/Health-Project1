@@ -64,16 +64,65 @@ Core logic for handling user queries.
 Routes tasks to the correct tools or sub-agents.
 
 context.py
-Manages user session data and memory.
+Manages + Store user/session info ✅
+Maintain chat history ✅
 Keeps track of user state during interactions.
+Share data between components ✅
 
 guardrails.py
 Validates input/output for safety and correctness.
 Ensures structured responses and input format.
 
 hooks.py
-Contains event hooks for actions like logging or debugging.
-Useful for monitoring or tracking behavior.
+Contains event hooks for actions like logging, debugging, or injecting custom logic.
+Useful for monitoring, tracking behavior, or running code before/after agent actions.
+Helps customize the agent's lifecycle — e.g., log when a tool is called, or modify a message before it’s sent.
+Ideal for adding metrics, alerts, validations, or analytics without changing core logic
+
+USER MESSAGE
+    ↓
+[Input Hook] ➝ [Load Context]
+    ↓
+[Agent Planning / Tool Call]
+    ↓
+[Tool Hook] ➝ [Response Hook]
+    ↓
+FINAL RESPONSE SENT
+
+🔻 User submits a message on the web page (via main.py)
+    ↓
+🔧 [hooks.py] Input Hook triggers 
+    - Logs input
+    - Validates input
+    - Prepares or cleans message
+    ↓
+📦 [context.py] loads session context
+    - Loads user ID, chat history, current goal, etc.
+    ↓
+🧠 [agent.py] Main Agent receives input
+    - Analyzes intent
+    - Decides: reply directly, call tool, or handoff to another agent
+    ↓
+🛡️ [guardrails.py] (optional at this point)
+    - Validates prompt or constraints (e.g., remove unsafe input)
+    ↓
+🧰 [tools/] Called if needed
+    - Executes functions (e.g., diet_plan_tool, search_api, etc.)
+    ↓
+🔁 Returns result to agent.py
+    ↓
+🛡️ [guardrails.py] Output check (again optional)
+    - Filters or adjusts agent output before sending
+    ↓
+🔧 [hooks.py] Output Hook triggers
+    - Logs response
+    - Adds tracking/analytics/debug info
+    ↓
+📡 [streaming.py] (optional if enabled)
+    - Streams response word-by-word or chunk-by-chunk
+    ↓
+💬 Final response sent to user via main.py (Streamlit, UI, etc.)
+
 
 # 📁 tools/ – Feature-specific tools
 
@@ -91,6 +140,25 @@ Schedules plans (e.g., reminders, routines).
 
 tracker.py
 Tracks progress like calories, weight, or exercise logs.
+# -------------------------------------------------------------------
+🔧 1️⃣ tools/ folder — (Core Work Functions)
+📌 Purpose:
+Write logic-heavy, calculation-based, or data-processing code here.
+
+🧠 Examples of Code in Tools:
+| Function Type         | Example Code                         |
+| --------------------- | ------------------------------------ |
+| Calculation           | `calculate_bmi(height, weight)`      |
+| API call              | `fetch_weather(city)`                |
+| Text parsing          | `extract_numbers_from_text(message)` |
+| Strategy logic        | `create_meal_plan(goal, allergies)`  |
+| Recommendation engine | `recommend_workouts(goal, injury)`   |
+
+
+✅ Tools do the work, but they do not decide when to run. That decision is made by the main agent.
+
+🧰 2️⃣ sub-tools/ (Optional if tools are grouped under a sub-agent)
+Sometimes, tools are specific to one sub-agent, like a fitness_tools.py used only by a FitnessAgent.
 
 # 📁 agents/ – Specialized agents
 
@@ -118,6 +186,38 @@ Instructions for setup, usage, and dependencies.
 main.py – Starts the Streamlit app.
 
 agent.py – Main brain; routes user input to the right tool.
+👤 3️⃣ sub-agents/ (Specialist Decision-Makers)
+📌 Purpose:
+Each sub-agent handles a specific domain (e.g., Injury, Career, Fitness).
+It has:
+
+Its own logic
+
+May call its own tools
+
+Can also reply directly for common questions
+
+🧠 Examples of Code in Sub-Agents:
+| Code Type        | Example                                     |
+| ---------------- | ------------------------------------------- |
+| Direct replies   | `"Your injury needs rest"`                  |
+| Tool usage       | `call suggest_safe_exercises(injury)`       |
+| Context check    | `if user_goal == "recover": ...`            |
+| Reply formatting | `return "Here’s your 3-week recovery plan"` |
+
+🔁 4️⃣ Handoff Code (Always written in agent.py)
+📌 Purpose:
+Main agent decides:
+“This is not my job — hand it off to a sub-agent.”
+✅ Summary Table For Tool/sub-tools, agent.py / sub-agents
+| File/Folder   | Purpose                         | Type of Code                              |
+| ------------- | ------------------------------- | ----------------------------------------- |
+| `tools/`      | Core work functions             | Calculations, strategies, APIs            |
+| `sub-tools/`  | Specialized tools               | Only for a sub-agent (optional folder)    |
+| `sub-agents/` | Domain-specific decision makers | Replies, tool usage, internal logic       |
+| `agent.py`    | Central decision router         | Handoff logic, tool calling, direct reply |
+
+
 
 context.py – Stores session info and user state.
 
@@ -538,3 +638,36 @@ streamlit run main.py
 =======
 # Health-Project1
 
+🔻 User submits a message on the web page (via main.py)
+    ↓
+🔧 [hooks.py] Input Hook triggers 
+    - Logs input
+    - Validates input
+    - Prepares or cleans message
+    ↓
+📦 [context.py] loads session context
+    - Loads user ID, chat history, current goal, etc.
+    ↓
+🧠 [agent.py] Main Agent receives input
+    - Analyzes intent
+    - Decides: reply directly, call tool, or handoff to another agent
+    ↓
+🛡️ [guardrails.py] (optional at this point)
+    - Validates prompt or constraints (e.g., remove unsafe input)
+    ↓
+🧰 [tools/] Called if needed
+    - Executes functions (e.g., diet_plan_tool, search_api, etc.)
+    ↓
+🔁 Returns result to agent.py
+    ↓
+🛡️ [guardrails.py] Output check (again optional)
+    - Filters or adjusts agent output before sending
+    ↓
+🔧 [hooks.py] Output Hook triggers
+    - Logs response
+    - Adds tracking/analytics/debug info
+    ↓
+📡 [streaming.py] (optional if enabled)
+    - Streams response word-by-word or chunk-by-chunk
+    ↓
+💬 Final response sent to user via main.py (Streamlit, UI, etc.)
